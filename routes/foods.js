@@ -6,29 +6,27 @@ const foods = [
   {
     id: "1",
     name: "Apple",
-    category: "Fruit",
-    numberInStock: "15",
-    price: "3",
+    category: { _id: 1, name: "Fruit" },
+    numberInStock: 15,
+    price: 3,
   },
   {
     id: "2",
     name: "Cookie",
-    category: "Snack",
-    numberInStock: "89",
-    price: "9",
+    category: { _id: 2, name: "Snack" },
+    numberInStock: 89,
+    price: 9,
   },
   {
     id: "3",
     name: "Cucumber",
-    category: "Vegetable",
-    numberInStock: "26",
-    price: "5",
+    category: { _id: 3, name: "Vegetable" },
+    numberInStock: 26,
+    price: 5,
   },
 ];
 
-router.get("/", (req, res) => {
-  return res.send(foods);
-});
+router.get("/", (req, res) => res.send(foods));
 
 router.get("/:id", (req, res) => {
   const food = foods.find((food) => food.id === req.params.id);
@@ -40,34 +38,28 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { error } = validateFood(reg.body);
+  const { error } = validate(req.body);
   if (error) return res.status(400).send(error.message);
 
-  const food = { id: "4", name: req.body.name };
+  const food = req.body;
 
   foods.push(food);
   return res.send(food);
 });
 
 router.put("/:id", (req, res) => {
-  // steg 1: validera med Joi
-  const { error } = validateFood(req.body);
+  const { error } = validate(req.body); // steg 1: validera med Joi
+  if (error) return res.status(400).send(error.message); // om ogiltig body, returnera 400
 
-  // om ogiltig body, returnera 400
-  if (error) return res.status(400).send(error.message);
-
-  // steg 2: hitta objeketet med angivet id
-  const food = foods.find((food) => food.id === req.params.id);
-
-  // om ej hittas, returnera 404
+  let food = foods.find((food) => food.id === req.params.id); // steg 2: hitta objeketet med angivet id
   if (!food)
-    return res.status(404).send("The food with the given id is not found.");
+    return res.status(404).send("The food with the given id is not found."); // om ej hittas, returnera 404
+
+  food.body = req.body;
 
   //steg 3: göra uppdateringen
-  food.name = req.body.name;
 
-  //returnera med res.send
-  return res.send(food);
+  return res.send(food.body); //returnera med res.send
 });
 
 router.delete("/:id", (req, res) => {
@@ -82,8 +74,14 @@ router.delete("/:id", (req, res) => {
   return res.send(food);
 });
 
-function validateFood(food) {
-  const schema = Joi.object({ name: Joi.string().required() });
+function validate(food) {
+  const schema = Joi.object({
+    id: Joi.string(),
+    name: Joi.string().min(2).max(50).required(),
+    categoryId: Joi.string().required(),
+    numberInStock: Joi.number().min(0).max(100).required(),
+    price: Joi.number().min(0).max(10).required(),
+  });
   return schema.validate(food);
 }
 
