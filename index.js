@@ -1,5 +1,6 @@
 const foods = require("./routes/foods");
 const categories = require("./routes/categories");
+const users = require("./routes/users");
 const mongoose = require("mongoose");
 const express = require("express");
 const app = express("express");
@@ -8,6 +9,7 @@ const app = express("express");
 app.use(express.json()); // req.body får objeketet vi skickar in istället för undefined
 app.use("/api/foods", foods);
 app.use("/api/categories", categories);
+app.use("/api/users", users);
 
 mongoose
   .connect("mongodb://localhost/intensive-food-Node")
