@@ -7,11 +7,17 @@ const userSchema = mongoose.Schema({
   email: { type: mongoose.SchemaTypes.Email, required: true },
   password: { type: String, minlength: 5, required: true },
   name: { type: String, minlength: 2 },
+  isAdmin: Boolean,
 });
 
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
-    { _id: this._id, name: this.name, email: this.email },
+    {
+      _id: this._id,
+      name: this.name,
+      email: this.email,
+      isAdmin: this.isAdmin,
+    },
     process.env.JWT_SECRET
   );
   return token;

@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 const { Food, validate } = require("../models/Food");
 const { Category } = require("../models/Category");
 
 router.get("/", async (req, res) => {
-  const foods = await Food.find();
-  return res.send(foods);
+  try {
+    const foods = await Food.find();
+    return res.send(foods);
+  } catch (error) {}
 });
 
 router.get("/:id", async (req, res) => {
@@ -17,7 +21,7 @@ router.get("/:id", async (req, res) => {
   return res.send(food);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.message);
 
@@ -42,7 +46,7 @@ router.post("/", async (req, res) => {
   return res.send(food);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", [auth, admin], async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.message);
 
@@ -71,7 +75,7 @@ router.put("/:id", async (req, res) => {
   return res.send(food);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", [auth, admin], async (req, res) => {
   const food = await Food.findByIdAndDelete(req.params.id);
 
   if (!food)
