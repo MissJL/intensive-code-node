@@ -11,9 +11,17 @@ router.post("/", async (req, res) => {
   if (existingUser) return res.status(400).send("User already registered");
 
   const user = new User(req.body);
+  const salt = await bcrypt.genSalt();
+  user.password = await bcrypt.hash(user.password, salt);
   user.save();
 
-  return res.status(201).send(user);
+  const { password, ...userWithoutPassword } = user.toObject();
+  const token = user.generateAuthToken();
+
+  return res
+    .status(201)
+    .header("x-auth-token", token)
+    .send(userWithoutPassword);
 });
 
 module.exports = router;
