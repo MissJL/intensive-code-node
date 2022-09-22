@@ -6,10 +6,8 @@ const { Food, validate } = require("../models/Food");
 const { Category } = require("../models/Category");
 
 router.get("/", async (req, res) => {
-  try {
-    const foods = await Food.find();
-    return res.send(foods);
-  } catch (error) {}
+  const foods = await Food.find();
+  return res.send(foods);
 });
 
 router.get("/:id", async (req, res) => {
